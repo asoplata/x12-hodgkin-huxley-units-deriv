@@ -1,0 +1,114 @@
+\documentclass[letterpaper,onecolumn]{article}
+\usepackage{graphicx}
+\usepackage{amsmath, amsfonts}
+% \usepackage{mathrsfs}
+\usepackage{fancyhdr} %needed for the "name on every page header, below paygestyle
+\usepackage[margin=1in]{geometry} %should institute 0.5in margins, untested
+%investigate L/R margins vs. top, def a diff
+\usepackage[textfont={scriptsize},font=bf]{caption}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{wrapfig}
+\usepackage{chngcntr}
+\usepackage{cancel}
+
+%% Total document settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \renewcommand{\figurename}{{\bf Fig.}} %affects figure caption only
+% \renewcommand{\thefigure}{{\bf\arabic{figure}}}
+% \renewcommand{\thetable}{{\bf\arabic{table}}}
+% \def\equationautorefname{{\bf Eq.}}
+% \def\figureautorefname{{\bf Fig.}}
+
+% \setlength{\columnsep}{0.75cm} % only for double column
+\counterwithin{figure}{section}
+\counterwithin{equation}{section}
+\hypersetup{
+    colorlinks=true,       % false: boxed links; true: colored links
+    linkcolor=blue
+}
+
+
+\begin{document}
+%% Pretty doc settings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\pagestyle{fancy} %needed simply for the header
+\fancyhead[L]{{\it Austin Soplata, \the\year}}
+\fancyfoot[R]{{\it\small Proceedings of the National Academy of Austin Soplata}}
+
+\title{Units in the Hodgkin-Huxley spiking neuron model.}
+\author{Austin Soplata}
+\maketitle
+
+%% Some notes:
+%* units and amounts of currents from Destexhe 1993, 1996, and hodgkin huxley 1952:
+%- Note: all units in the new current graphs are correct as far as I can tell
+%in Destexhe 1996 and 1993. Just to be safe, here are the citations:
+%- RE I_leak in mS/cm2
+%- TC I_leak in mS/cm2
+%- TC I_T in mS/cm2 (1.75 in both)
+%- TC I_H in mS/cm2 (1996)
+%- TC I_H in mS/cm2 thank god (1993a) (of course is varied over 0.01 to 0.2)
+%- only nS (no cm2) values are syns in 93b, but no syns in 93a
+%- TC I_KL had g of 2~8 nS (no cm2)
+%-based on brief review of some of the conductances in the paper and eval of the remaining ones (Na, K, L) with HH in the figure above, all the ones currently used (2013_07_30) are mS/cm^2
+
+
+%% Actual document body %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% --------------------------------------------------------------------------------------------------------------------------------
+\section{Assumed derivation}
+\label{sec:1}
+
+\indent\indent First, we will derive the units for a typical channel of $g_{ion}(V_{cell}-V_{rev pot})$ type, assuming the units given in page 519 of {\it Hodgkin, A. L., $\&$ Huxley, A. F. (1952). A quantitative description of membrane current and its application to conduction and excitation in nerve. The Journal of Physiology, 117(4), 500.} 
+The units given for $g_{ion}$ are $\frac{milliSiemens}{cm^2}$ or $\frac{mS}{cm^2}$, voltage and reversal potentials are in $mV$, and current are in $\frac{\mu A}{cm^2}$.
+The identities used include, from wikipedia, $Siemens = \frac{Ampere}{Volt}$.
+
+% omfg \autoref{fig:1_1} derp.
+% 
+% \begin{figure}
+% % \begin{wrapfigure}{r}{0.5\textwidth}
+% \centering
+% \includegraphics[scale=0.1]{classname_fig1_1.jpg}
+% \caption{lulz}
+% \label{fig:1_1}
+% \end{figure}
+% % \end{wrapfigure}
+
+\begin{equation}
+g(V-V_{rev}) = \frac{mS * mV}{cm^2} = \frac{1}{cm^2} \frac{\cancel{mS}}{1} \frac{1S}{1000\cancel{mS}} \frac{\cancel{mV}}{1} \frac{1V}{1000\cancel{mV}}
+= \frac{SV}{cm^2 1E6} = \frac{A}{cm^2 1E6} = \frac{\cancel{A}}{cm^2 \cancel{1E6}} \frac{\cancel{1E6}\mu A}{\cancel{A}} = \frac{1 \mu A}{cm^2} 
+\label{eqn:1_1}
+\end{equation}
+
+\indent Next, we will show the same equivalence for the more important $C \frac{dV}{dt}$ contribution to the neuronal current in the model, where $C$ is in $\frac{microFarads}{cm^2}$ or $\frac{\mu F}{cm^2}$, $dV$ is still in $mV$, and $dt$, as with any of the time variables in the model equations, is in $milliseconds$ or $ms$.
+This uses the $F = \frac{A*s}{V}$ identity.
+
+\begin{equation}
+C\frac{dV}{dt} = \frac{\mu F * mV}{cm^2*ms} = \frac{1}{cm^2} \frac{1\cancel{\mu F}}{1} \frac{1 F}{1E6 \cancel{\mu F}} \frac{\cancel{mV}}{1} \frac{1V}{\cancel{1000}\cancel{mV}} \frac{1}{\cancel{ms}} \frac{\cancel{1000}\cancel{ms}}{s}
+= \frac{A*\cancel{s}}{cm^2 1E6 \cancel{V}} \frac{\cancel{V}}{\cancel{s}}
+= \frac{\cancel{A}}{cm^2 \cancel{1E6}} \frac{\cancel{1E6} \mu A}{\cancel{A}} = \frac{1 \mu A}{cm^2} 
+\label{eqn:1_2}
+\end{equation}
+
+\indent Thus, capacitance $C_m$ is in units of $\frac{\mu F}{cm^2}$
+
+Voltages, including $dV$, are in units of $mV$
+
+Time, including $dt$ and time constants, is in units of milliseconds, or $ms$
+
+Conductances are in units of milliSiemens over $cm^2$, or $\frac{mS}{cm^2}$
+
+And finally, current is in units of $\frac{\mu A}{cm^2}$ \\
+
+\indent Separately, there are a number of different ways of treating ``external" inputs into the cell like applied current and synaptic currents, that may or may not require the geometry of the cell to be specified.
+For what seems like most modern simple models that aren't, say, trying to reconstruct realistically-sized networks or even large ($>$500 neurons) networks (e.g. Traub et al. 2005), the trend appears to be strictly leaving out geometry and specifying applied and synaptic currents in total-area-independent units like those of Na, K, and L in the original HH equations: $\frac{\mu A}{cm^2}$ and $\frac{mS}{cm^2}$ for applied current and synaptic conductance, respectively.
+
+\indent If a paper is 1. recent (e.g. $>$ 2000 whatever), 2. does not specify the geometric size of the neuron, and 3. does not do justice to explicitly specify synaptic conductance units, then one should probably assume the synaptic conductances are total-area-independent as well, i.e. in $\frac{mS}{cm^2}$.
+Following this same line of thinking, since one will not be able to specify any absolute current if the geometry is unknown, applied current will also be total-area-independent, in units of $\frac{\mu A}{cm^2}$ and the like.
+Examples of this include Borgers et al. 2008 and Wang et al. 1996.
+
+\indent Alternatively, Destexhe at least uses $\frac{mS}{cm^2}$ for typical non-synaptic conductances like $g_{Na}$, but absolute conductance in $mS$, or $nS$ etc. for synaptic conductances; in this case, one must explicitly specify the surface area of the cell in order to calculate and take into account the current afforded by the synapse.
+Similarly, if the geometry/surface area is specified, then the applied current can be specified in absolute terms, e.g. $nA$ etc.
+Examples of this include Destexhe et al. 1996, Destexhe et al. 1993.
+
+
+
+\end{document}
